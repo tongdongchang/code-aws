@@ -1,18 +1,22 @@
 import {useState,useEffect,useRef} from "react"
 import AnxiosInstance from "../prop/GetToken";
+import Alert from "../prop/Alert";
 function Track(){
   const [audio,setAudio] = useState(null)
   const [video,setVideo] = useState(null)
   const [artistCurrent,setArtist] = useState(null)
   const [albumCurrent,setAlbum] = useState(null)
   const [reload,setReload] = useState(false)
+  const [mode, setMode] = useState("add") // "add" | "edit"
+  const[error,setError] = useState({type:null,mess:null});
+const [currentId, setCurrentId] = useState(null)
   useEffect(
     ()=>{
       AnxiosInstance.get('track/?category=audio').then(res=>setAudio(res.data)).catch(err=>console.log(err))
       AnxiosInstance.get('track/?category=video').then(res=>{setVideo(res.data);console.log(res.data)}).catch(err=>console.log(err))
       AnxiosInstance.get('artist/').then(res=>setArtist(res.data)).catch(err=>console.log(err))
       AnxiosInstance.get('album/?fields=id,title,image_url,decription').then(res=>setAlbum(res.data)).catch(err=>console.log(err))
-    },[reload])
+    },[])
     const [isPrenium,setIsPrenium] = useState(false);
     const [categoryCurrent,setCagoryCurrent] = useState("audio")
     const handleSearch = (e) =>{
@@ -48,7 +52,8 @@ function Track(){
 <td>{a.release_date}</td>
 <td>{a.file}</td>
 <td onClick={()=>handleDelete(a.id)}>Delete</td>
-<td>Edit</td>
+<td   data-bs-toggle="modal"
+  data-bs-target="#myModal" onClick={()=>{ setMode('edit'); setCurrentId(a.id)}}>Edit</td>
 </tr>)
 
     const renderListAudioPrenium = audio&& audio.filter(value=>value.is_Prenium==true).map(a => <tr key={a.id}>
@@ -57,7 +62,8 @@ function Track(){
 <td>{a.release_date}</td>
 <td>{a.file}</td>
 <td onClick={()=>handleDelete(a.id)}>Delete</td>
-<td>Edit</td>
+<td   data-bs-toggle="modal"
+  data-bs-target="#myModal" onClick={()=>{ setMode('edit'); setCurrentId(a.id)}}>Edit</td>
 </tr>)
    const renderVideo= video&& video.filter(value => value.is_Prenium==false).map(a => <tr>
 <td>{a.title}</td>
@@ -65,7 +71,8 @@ function Track(){
 <td>{a.release_date}</td>
 <td>{a.file}</td>
 <td onClick={()=>handleDelete(a.id)}>Delete</td>
-<td>Edit</td>
+<td   data-bs-toggle="modal"
+  data-bs-target="#myModal" onClick={()=>{ setMode('edit'); setCurrentId(a.id)}}>Edit</td>
 </tr>)
    const renderVideoPrenium= video&& video.filter(value => value.is_Prenium==true).map(a => <tr>
 <td>{a.title}</td>
@@ -73,7 +80,8 @@ function Track(){
 <td>{a.release_date}</td>
 <td>{a.file}</td>
 <td onClick={()=>handleDelete(a.id)}>Delete</td>
-<td>Edit</td>
+<td   data-bs-toggle="modal"
+  data-bs-target="#myModal" onClick={()=>{ setMode('edit'); setCurrentId(a.id)}}>Edit</td>
 </tr>)
     const name = useRef()
     const album = useRef()
@@ -94,9 +102,32 @@ function Track(){
         headers:{
           "Content-Type":'multipart/form-data'
         }
-      }).then(res=>console.log(res.data))
+      }).then(res=>setError({ type: 'message',mess:'Add thành công',timestamp:Date.now() }))
       .catch(res=>console.log(res))
     }
+    const handleUpdate = (id) => {
+  const formData = new FormData()
+
+  formData.append('title', name.current.value)
+  formData.append('category', category.current.value)
+  formData.append('album', album.current.value)
+  formData.append('artists', artists.current.value)
+  formData.append('is_Prenium', isPrenium ? "true" : "false")
+
+  if (file.current.files[0]) {
+    formData.append('file', file.current.files[0])
+  }
+
+  if (fileImg.current.files[0]) {
+    formData.append('fileImg', fileImg.current.files[0])
+  }
+
+  AnxiosInstance.put(`TrackChanging/${id}/`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data"
+    }
+  })
+}
     const Render = ()=>{
       if(categoryCurrent=="audio" && isPrenium){
         return renderListAudioPrenium
@@ -110,6 +141,7 @@ function Track(){
     }
 return(
     <div className="ManageUsers Track">
+      <Alert error={error.mess} type={error.type} id={error.timestamp}></Alert>
     <h1>Track</h1>
     <div>
         <h3>Category</h3>
@@ -129,7 +161,7 @@ return(
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title">Add New</h4>
+        <h4 class="modal-title">{mode.toUpperCase()}</h4>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
@@ -178,9 +210,19 @@ return(
             </div>
         </form>
       </div>
-      <div class="modal-footer">
-      <button type="button" class="btn btn-info" onClick={handleSubmit}>Add</button>
-      </div>
+<div className="modal-footer">
+  {mode === "add" && (
+    <button className="btn btn-info" onClick={handleSubmit}>
+      Add
+    </button>
+  )}
+
+  {mode === "edit" && (
+    <button className="btn btn-info" onClick={() => handleUpdate(currentId)}>
+      Update
+    </button>
+  )}
+</div>
     </div>
   </div>
 </div>
@@ -193,7 +235,15 @@ return(
       <div>
             <input className="form-control" type="search" name="browser" placeholder="Name of track" onChange={(e)=>handleSearch(e)} />
       </div>
-      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal">
+    <button
+  className="btn btn-primary"
+  data-bs-toggle="modal"
+  data-bs-target="#myModal"
+  onClick={() => {
+    setMode("add")
+    setCurrentId(null)
+  }}
+>
   Add New
 </button>
     </div>

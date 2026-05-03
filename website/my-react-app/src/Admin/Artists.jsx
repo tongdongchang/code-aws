@@ -3,6 +3,9 @@ import AnxiosInstance from "../prop/GetToken";
 function Artists(){
     const [artistCurrent,setArtist] = useState(null)
     const [addName,setAddName] = useState('')
+      const [mode, setMode] = useState("add") // "add" | "edit"
+  const[error,setError] = useState({type:null,mess:null});
+const [currentId, setCurrentId] = useState(null)
     const name = useRef()
     useEffect(()=>{
             AnxiosInstance.get('artist/').then(res=>setArtist(res.data)).catch(err=>console.log(err))
@@ -12,12 +15,24 @@ function Artists(){
       <td>{a.total_song}</td>
       <td>{a.total_album}</td>
       <td onClick={()=>handleDelete(a.id)}>Delete</td>
-      <td>Edit</td>
+      <td onClick={()=>handleUpdate(a.id)} data-bs-toggle="modal" data-bs-target="#myModal">Edit</td>
     </tr>)
     const handleAddArtist = () => {
   const formData = new FormData()
   formData.append('name', name.current.value)
   AnxiosInstance.post('artist/', formData)
+    .then(res => console.log(res.data))
+    .catch(err => console.log(err))
+}
+const handleUpdate = (id) => {
+  const formData = new FormData()
+  formData.append('name', name.current.value)
+
+  AnxiosInstance.put(`artist/${id}/`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data"
+    }
+  })
     .then(res => console.log(res.data))
     .catch(err => console.log(err))
 }
@@ -55,7 +70,7 @@ return(
 
   
       <div class="modal-header">
-        <h4 class="modal-title">Ad New</h4>
+        <h4 class="modal-title">{mode.toUpperCase()}</h4>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
 
@@ -68,9 +83,19 @@ return(
       </div>
 
     
-      <div class="modal-footer">
-        <button type="button" class="btn btn-info" onClick={handleAddArtist}>Add</button>
-      </div>
+   <div className="modal-footer">
+  {mode === "add" && (
+    <button className="btn btn-info" onClick={handleAddArtist}>
+      Add
+    </button>
+  )}
+
+  {mode === "edit" && (
+    <button className="btn btn-info" onClick={() => handleUpdate(currentId)}>
+      Update
+    </button>
+  )}
+</div>
 
     </div>
   </div>

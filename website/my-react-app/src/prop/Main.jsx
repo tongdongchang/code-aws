@@ -6,6 +6,7 @@ import Head from './Head';
 import { useNavigate } from 'react-router-dom';
 import {useState,useEffect,useContext} from 'react';
 import { MusicContext } from './Home';
+import { env } from '../env';
 import axios from 'axios';
 function Main(){
   const {setData,user} = useContext(MusicContext)
@@ -14,20 +15,20 @@ function Main(){
   const [album,setAlbum] = useState([])
   useEffect(
     ()=>{
-      axios.get('http://127.0.0.1:8000/api/track/?category=audio')
+      axios.get(`${env}/api/track/?category=audio`)
       .then(res=>{
       setAudio(res.data)
       console.log(res.data)
       }).catch(err=>{
       console.log(err)
       });
-      axios.get('http://127.0.0.1:8000/api/track/?category=video')
+      axios.get(`${env}/api/track/?category=video`)
       .then(res=>{
       setVideo(res.data)
       }).catch(err=>{
       console.log(err)
       });
-      axios.get('http://127.0.0.1:8000/api/album/?fields=id,title,image_url,decription')
+      axios.get(`${env}/api/album/?fields=id,title,image_url,decription`)
       .then(res=>{
       setAlbum(res.data)
       }).catch(err=>{
@@ -49,14 +50,14 @@ function Main(){
     <div className='box1' key={au.id} onClick={()=>{
       if(!au.is_Prenium ||(au.is_Prenium&&user.is_premium)){ handleAudio({file:au.file,artists:au.artists,image_url:au.image_url,title:au.title})}
      }}>
-   <img src={au.image_url} alt={`http://localhost:8000/${au.image_url}/`} />
+   <img src={au.image_url} alt={`${env}/${au.image_url}/`} />
     <p>{au.title} {au.is_Prenium && "(Prenium)"}</p>
     <i class="fa-sharp fa-solid fa-circle-play"></i>
     </div>
   ))
   const listAlbum = album.map(al=>(
     <div className="Card" key={al.id} onClick={()=>handleAlbum(al.id)}>
-    <img src={`http://localhost:8000/media/${al.image_url}/`} alt="lõi" />
+    <img src={al.image_url} alt="lõi" />
     <p className='card-title'>{al.title}</p>
     <p className='card-content'>{al.decription}</p>
     </div>

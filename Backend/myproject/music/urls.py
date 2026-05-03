@@ -10,6 +10,8 @@ urlpatterns = [
     path('register/',views.Register.as_view(),name='Register'),
     path('track/',views.TrackList.as_view(),name='Track'),
     path('album/',views.AlbumList.as_view(),name='Album'),
+    path('album/<int:id>/', views.AlbumList.as_view()),  # chi tiết, PUT, DELETE
+
     path('token/',TokenObtainPairView.as_view(),name='Token_pair'),
     path('token/refresh/',TokenRefreshView.as_view(),name='Token_refresh'),
     path('profile/',views.ProfileAPIView.as_view(),name='Profile'),
@@ -19,5 +21,6 @@ urlpatterns = [
     path('addtracktoplaylist/',views.AddTrackToPlaylist.as_view(),name='addTrack'),
     path('searchFull/',views.Search.as_view(),name='SearchFull'),
     path('EditPlaylist/',views.playlistEdit.as_view(),name='playlistEdit'),
+    path('TrackChanging/',views.TrackChanging.as_view(),name='playlistEdit'),
     path('TrackChanging/<int:id>/',views.TrackChanging.as_view(),name='playlistEdit'),
 ]

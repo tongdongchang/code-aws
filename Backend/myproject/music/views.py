@@ -37,6 +37,23 @@ class AritistList(APIView):
         )
 
         return Response({'message': 'Created successfully'})
+    def put(self, request, id):
+        artist = get_object_or_404(Artists, id=id)
+
+        name = request.data.get('name', '').strip()
+        image = request.FILES.get('image_url')
+
+        if name:
+            artist.name = name
+
+        if image:
+            # xoá ảnh cũ nếu có
+            if artist.image_url:
+                artist.image_url.delete(save=False)
+            artist.image_url = image
+
+        artist.save()
+        return Response({'message': 'Updated successfully'})
 class ProfileAPIView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
@@ -77,16 +94,39 @@ class TrackListSearch(APIView):
             return Response(serializer.data)
         return Response([])
 class AlbumList(APIView):
-    def get(self,request):
-        album=Album.objects.all().order_by('-point')
-        fields=request.query_params.get('fields','').strip()
-        fields_set=fields.split(',')
-        fields_total=[x.strip() for x in fields_set if x!='']
-        if fields_total:
-            data=album.values(*fields_total)
-            return Response(data)
-        serializer=AlbumSerializer(album,many=True)
+    parser_classes = (MultiPartParser, FormParser)
+
+    def get(self, request, id=None):
+        if id:
+            album = get_object_or_404(Album, id=id)
+            serializer = AlbumSerializer(album, context={'request': request})
+            return Response(serializer.data)
+        albums = Album.objects.all()
+        serializer = AlbumSerializer(albums, many=True, context={'request': request})
         return Response(serializer.data)
+
+    def post(self, request):
+        # Tạo album mới
+        serializer = AlbumSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
+
+    def put(self, request, id):
+        album = get_object_or_404(Album, id=id)
+        serializer = AlbumSerializer(album, data=request.data, partial=True, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+
+    def delete(self, request, id):
+        album = get_object_or_404(Album, id=id)
+        if album.image_url:
+            album.image_url.delete(save=False)
+        album.delete()
+        return Response({'message': 'Deleted successfully'}, status=204)
 class Register(APIView):
     def post(self, request):
         try:
@@ -209,4 +249,40 @@ class TrackChanging(APIView):
 
         track.delete()
         return Response({'message': 'Deleted successfully'}, status=204)
+    def put(self, request, id):
+        track = get_object_or_404(Track, id=id)
+
+        title = request.data.get('title', track.title).strip()
+        category = request.data.get('category', track.category).strip()
+        album_id = request.data.get('album')
+        artists = request.data.get('artists')
+        is_Prenium = request.data.get('is_Prenium')
+
+        file = request.FILES.get('file')
+        image_url = request.FILES.get('fileImg')
+
+        # update basic fields
+        track.title = title
+        track.category = category
+        track.is_Prenium = (is_Prenium == 'true')
+
+        # FK (handle null)
+        track.album_id = album_id or None
+        track.artists_id = artists or None
+
+        # 🔥 update file nếu có
+        if file:
+            if track.file:
+                track.file.delete(save=False)  # xoá file cũ
+            track.file = file
+
+        # 🔥 update ảnh nếu có
+        if image_url:
+            if track.image_url:
+                track.image_url.delete(save=False)
+            track.image_url = image_url
+
+        track.save()
+
+        return Response({'message': 'Updated successfully'})
         

@@ -4,7 +4,7 @@ import { useParams, useSearchParams } from 'react-router-dom'
 import { useEffect,useState,useRef,useContext } from 'react';
 import axios from "axios";
 import {MusicContext} from './Home'
-
+import { env } from '../env';
 function PlayList(){
     const [searchParams] = useSearchParams(); 
     const id = searchParams.get('id');
@@ -12,7 +12,7 @@ function PlayList(){
     const [album,setAlbum]=useState();
     const [currentId,setCurrentId] = useState();
     useEffect(()=>{
-        axios.get('http://localhost:8000/api/trackalbum/', {
+        axios.get(`${env}/api/trackalbum/`, {
             params: { id: id }
           }
         ).then(res=>{setAlbum(res.data)

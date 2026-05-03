@@ -586,6 +586,7 @@ label{
   background-color: red;
   cursor: pointer;
 }
+
 .ViewDetail tbody tr td:nth-child(5){
   background-color: rgb(0, 255, 51);
   cursor: pointer;
@@ -849,4 +850,7 @@ gap: 8px;
 }
 .modal-body-name input::placeholder{
   color: hsl(0, 1%, 32%);
+}
+.viewdetail-album{
+  min-width: 30% !important;
 }

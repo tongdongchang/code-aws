@@ -1,6 +1,7 @@
 import { useState,useEffect,useRef } from "react"
 import Alert from "./Alert"
 import { Link,useNavigate } from "react-router-dom"
+import { env } from "../env";
 import axios from "axios";
 function Login(){
     const[user,setUser] = useState({username:'',password:''});
@@ -10,7 +11,7 @@ function Login(){
     const navigate = useNavigate()
     const handlesubmit = (e)=>{
         e.preventDefault();
-        axios.post('http://localhost:8000/api/token/',user)
+        axios.post(`${env}/api/token/`,user)
         .then(res=>{
             localStorage.setItem('access_token',res.data.access)
             localStorage.setItem('refresh_token',res.data.refresh)

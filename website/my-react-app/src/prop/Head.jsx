@@ -5,6 +5,7 @@ import img1 from '../assets/no-music.jpg';
 import { Link,useNavigate } from "react-router-dom";
 import AnxiosInstance from "./GetToken";
 import { MusicContext } from "./Home";
+import { env } from "../env";
 function Head(){
     const [open,setOpen] = useState(false)
     const dropdownRef = useRef(null); // Ref cho dropdown
@@ -62,7 +63,7 @@ return(
         <div className="nav-header-user">
           {profile?.is_premium?<button>Your are prenium</button>:<button class="badge nav-items hide" onClick={()=>navigate('/paypal')}>Explore Premium</button>}
         
-        {profile?<img src={`http://127.0.0.1:8000/${profile.image_url}/`}ref={userIconRef} onClick={()=>setOpen(open=>open=true)} width={40} height={40}></img>:<i className="fa-regular fa-user nav-items" ref={userIconRef} onClick={()=>setOpen(open=>open=true)}></i>}
+        {profile?<img src={`${env}/${profile.image_url}/`}ref={userIconRef} onClick={()=>setOpen(open=>open=true)} width={40} height={40}></img>:<i className="fa-regular fa-user nav-items" ref={userIconRef} onClick={()=>setOpen(open=>open=true)}></i>}
         {open&&(
     <ul class="dropdown" ref={dropdownRef} >
       <li>{profile?<Link data-bs-toggle="modal" data-bs-target="#myModal123">Profile</Link>:<Link to='/login'>Login</Link>}</li>

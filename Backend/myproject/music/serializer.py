@@ -32,13 +32,21 @@ class TrackSerializer(serializers.ModelSerializer):
             return request.build_absolute_uri(obj.file.url)
         return None
 class AlbumSerializer(serializers.ModelSerializer):
-    image_url=serializers.SerializerMethodField()
+    image_url = serializers.SerializerMethodField()
+    track_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Album
         fields = '__all__'
-    def get_image_url(self,obj):
-        request=self.context.get('request')
-        return request.build_absolute_uri(obj.image_url.url)
+
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+        if obj.image_url and request:
+            return request.build_absolute_uri(obj.image_url.url)
+        return None
+
+    def get_track_count(self, obj):
+        return obj.track_set.count()   # mặc định related_name là 'track_set'
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser

@@ -4,18 +4,19 @@ import Head from './Head';
 import axios from 'axios';
 import { useSearchParams,useNavigate } from 'react-router-dom';
 import { useState,useEffect } from 'react';
+import { env } from '../env';
 function PlayVideoMusic(){
     const [searchParams] = useSearchParams();
     const id = searchParams.get('id')
     const [OriginVideo,setOriginVideo] = useState()
     const [MoreVideo,setMoreVideo] = useState()
     useEffect(() => {
-        axios.get(`http://localhost:8000/api/track/?category=video&id=${id}`)
+        axios.get(`${env}/api/track/?category=video&id=${id}`)
         .then(res=>{setOriginVideo(res.data)
             console.log(res.data)
         })
         .catch(err=>console.log(err))
-        axios.get(`http://localhost:8000/api/track/?category=video`)
+        axios.get(`${env}/api/track/?category=video`)
         .then(res=>{setMoreVideo(res.data)}
     )
         .catch(err=>console.log(err))    

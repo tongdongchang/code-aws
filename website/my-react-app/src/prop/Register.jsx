@@ -2,6 +2,7 @@ import {useState,useEffect,useRef} from "react"
 import Alert from "./Alert";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { env } from "../env";
 function Register(){
     const[user,setUser] = useState({username:'',password:'',confirmPassword:'',email:''});
     const handleUser = (e)=>setUser({...user,[e.target.name]:   e.target.value});
@@ -9,7 +10,7 @@ function Register(){
     const[error,setError] = useState({type:null,mess:null});
     const handlesubmit = (e)=>{
         e.preventDefault();
-        axios.post('http://localhost:8000/api/register/',user)
+        axios.post(`${env}/api/register/`,user)
         .then(res=>{
             setError({ type: 'message', mess: 'Đăng ký thành công',timestamp:Date.now() })
         })

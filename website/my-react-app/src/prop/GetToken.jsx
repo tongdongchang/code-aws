@@ -1,6 +1,7 @@
 import axios from "axios";
+import { env } from "../env";
 const AnxiosInstance= axios.create({
-    baseURL: 'http://localhost:8000/api/',
+    baseURL: `${env}/api/`,
 }
 );
 AnxiosInstance.interceptors.request.use(
@@ -21,7 +22,7 @@ AnxiosInstance.interceptors.response.use(
         originalRequest._retry = true;
   
         try {
-          const res = await axios.post(`http://localhost:8000/api/token/refresh/`, {
+          const res = await axios.post(`${env}/api/token/refresh/`, {
             refresh: localStorage.getItem('refresh_token')
           });
   
